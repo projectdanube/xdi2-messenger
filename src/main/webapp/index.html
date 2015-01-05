@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="CloudMessengerApp">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>Cloud Messenger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link rel="shortcut icon" href="assets/images/favicon.ico" />
+
+
+    <link href="assets/libs/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/libs/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="assets/libs/animate.css/3.2.0/animate.min.css" rel="stylesheet">
+
+    <link href="assets/css/styles.css" rel="stylesheet">
+
+    <script src="assets/libs/jquery/1.11.1/jquery-1.11.1.min.js"></script>
+    <script src="assets/libs/lodash.js/2.4.1/lodash.min.js"></script>
+    <script src="assets/libs/angularjs/1.3.0/angular.min.js"></script>
+    <script src="assets/libs/angularjs/1.3.0/angular-resource.min.js"></script>
+    <script src="assets/libs/angularjs/1.3.0/angular-route.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="assets/libs/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="assets/libs/angular-bootstrap/0.11.2/ui-bootstrap-tpls-0.11.2.min.js"></script>
+
+    <script src="assets/libs/bootstrap-growl/2.0.1/bootstrap-growl.min.js"></script>
+
+    <script src="app/app.js"></script>
+
+
+    <!--[if lt IE 9]>
+        <script src="assets/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="assets/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+</head>
+
+<body ng-controller="DefaultCtrl">
+    <nav class="navbar navbar-fixed-top header">
+        <div class="col-md-12">
+            <div class="navbar-header">
+
+                <a href="#" class="navbar-brand">
+                    <span class="fa-stack ">
+				        <i class="fa fa-cloud fa-stack-2x"></i>
+                        <i class="fa fa-comment fa-stack-1x fa-inverse"></i>
+				    </span> Cloud Messenger
+                </a>
+
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <p class="navbar-text">{{sessionProperties.cloudName}}</p>
+                    </li>
+
+                    <li>
+                        <a href="doLogout">
+                            <i class="fa fa-sign-out fa-fw"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!--main-->
+    <div class="container-fluid" id="main" ng-controller="MessengerCtrl">
+
+        <div class="row" ng-controller="ConfigurationCtrl">
+            <div class="col-md-8 col-md-offset-2" ng-hide="configuration">
+                <div class="alert alert-danger" role="alert">
+                    <div class="row">
+                        <div class="col-xs-2 text-center">
+                            <i class="fa fa-warning fa-2x"></i>
+                        </div>
+                        <p class="col-xs-10">
+                            This messenger application needs to configure your cloud.
+                            <br />
+                            <a href ng-click="setup()">Please click here to configure it.</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="pull-right"><a href class="btn btn-default" ng-click="composeMessage()"><i class="fa fa-file-text-o"></i> Compose Message</a></span>
+                        <h4>Messages</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="list-group">
+                            <a href class="list-group-item" ng-repeat="m in messages | orderBy : 'timestamp' : true" ng-click="readMessage(m.xdiAddress)">
+
+                                <!--span class="badge">x</span-->
+                                <h4 class="list-group-item-heading">{{m.from}}</h4>
+                                <p class="text-right"><small>{{m.timestamp | date:'yyyy-MM-dd HH:mm:ss'}}</small>
+                                </p>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-sm-8" ng-show="view == 'readMessage'">
+                <div class="well well-sm">
+                    <div>
+                        <span class="pull-right"><small>{{currentMessage.timestamp | date:'yyyy-MM-dd HH:mm:ss'}}</small></span>
+                        <h4>{{currentMessage.from}}</h4>
+                    </div>
+
+                    <div class="btn-group btn-group-sm pull-right">
+                        <a href class="btn btn-default" ng-click="replyMessage(currentMessage.from)"><i class="fa fa-reply"></i> Reply</a>
+                        <a href class="btn btn-default" ng-click="deleteMessage(currentMessage.xdiAddress)"><i class="fa fa-trash-o"></i> Delete</a>
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <p style="white-space: pre;">{{currentMessage.content}}</p>
+
+                </div>
+            </div>
+
+            <div class="col-sm-8" ng-show="view == 'composeMessage'">
+                <div class="well well-sm">
+                    <form name="newMessageForm" class="form-horizontal">
+                        <div>
+                            <div class="form-group has-feedback" ng-class="{'has-error': newMessageForm.to.$error.cloudNameValidation}">
+                                <label class="control-label col-sm-1" for="to">To</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" name="to" id="to" ng-model="newMessage.to" placeholder="Enter a cloud name" cloud-name-validation ng-model-options="{ debounce: 250 }">
+                                    <span class="glyphicon glyphicon-remove form-control-feedback" ng-show="newMessageForm.to.$error.cloudNameValidation"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="padding:14px;">
+                            <textarea id="input-message-content" class="form-control" ng-model="newMessage.content"></textarea>
+                        </div>
+                        <button class="btn btn-success pull-right" type="button" ng-click="sendMessage()" ng-disabled="newMessageForm.$invalid">Send</button>
+                        <div class="clearfix"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="clearfix"></div>
+            <div class="spacer20"></div>
+        </div>
+    </div>
+    <!--/main-->
+
+</body>
+
+</html>
