@@ -41,6 +41,7 @@ import xdi2.messaging.MessageResult;
 import xdi2.messenger.model.CloudUser;
 import xdi2.messenger.model.Environment;
 import xdi2.messenger.model.Message;
+import xdi2.messenger.util.LogUtil;
 
 @Service
 public class MessengerService {
@@ -64,7 +65,7 @@ public class MessengerService {
 		message = user.prepareMessageToCloud(message);
 		message.createGetOperation(XDIAddressUtil.concatXDIAddresses(user.getCloudNumber().getXDIAddress(), XDI_MESSAGES_COL));
 
-		log.debug("getAllMessages message:\n" + messageEnvelope.getGraph().toString("XDI DISPLAY", null));
+		log.debug("getAllMessages message:\n" + LogUtil.prepareToLog(messageEnvelope.getGraph().toString("XDI DISPLAY", null)));
 
 		MessageResult messageResult = user.getXdiClient().send(messageEnvelope, null);
 
@@ -175,7 +176,7 @@ public class MessengerService {
 		message = user.prepareMessageToCloud(message);
 		message.createDelOperation(XDIAddress.create(messageXdiAddress));
 
-		log.debug("deleteMessage message:\n" + messageEnvelope.getGraph().toString("XDI DISPLAY", null));
+		log.debug("deleteMessage message:\n" + LogUtil.prepareToLog(messageEnvelope.getGraph().toString("XDI DISPLAY", null)));
 
 		user.getXdiClient().send(messageEnvelope, null);
 
@@ -193,7 +194,7 @@ public class MessengerService {
 
 		message.createGetOperation(publicMessengerLC);
 
-		log.debug("checkCloudConfiguration message:\n" + messageEnvelope.getGraph().toString("XDI DISPLAY", null));
+		log.debug("checkCloudConfiguration message:\n" + LogUtil.prepareToLog(messageEnvelope.getGraph().toString("XDI DISPLAY", null)));
 
 		MessageResult messageResult = user.getXdiClient().send(messageEnvelope, null);
 
@@ -213,7 +214,7 @@ public class MessengerService {
 
 		message.createSetOperation(publicMessengerLC);
 
-		log.debug("setupCloud message:\n" + messageEnvelope.getGraph().toString("XDI DISPLAY", null));
+		log.debug("setupCloud message:\n" + LogUtil.prepareToLog(messageEnvelope.getGraph().toString("XDI DISPLAY", null)));
 
 		user.getXdiClient().send(messageEnvelope, null);
 
