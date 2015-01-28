@@ -20,7 +20,7 @@ CloudMessengerApp.config(['$resourceProvider', '$httpProvider',
             return {
                 'response': function (response) {
                     //this string should be in login.jsp
-                    if (angular.isString(response.data) && response.data.indexOf('4d0bafeb-5b4c-4cbb-865e-d6211de5174e-login') != -1)
+                    if (angular.isString(response.data) && response.data.indexOf('4d0bafeb-5b4c-4cbb-865e-d6211de5174e-login') !== -1)
                         $window.location.reload();
                     return response;
                 }
@@ -52,40 +52,55 @@ controllers.controller("DefaultCtrl", ['$scope', '$rootScope', '$http',
   }]);
 
 
-controllers.controller("ConfigurationCtrl", ['$scope', '$http', 'Notification',
-  function ($scope, $http, Notification) {
+controllers.controller("ConfigurationCtrl", ['$scope', '$http', 'Notification', 'AuthorizedSender',
+  function ($scope, $http, Notification, AuthorizedSender) {
 
-        var checkSetup = function () {
-            $http.get('api/1.0/messenger/setup/')
-                .success(function (data) {
-                    $scope.configuration = data;
-                })
-                .error(function (data) {
-                    $scope.configuration = null;
+        var refreshAuthorizedSenders = function () {
+
+            $scope.inProgress = true;
+            AuthorizedSender.query(function (data) {
+                $scope.authorizedSenders = data;
+                $scope.inProgress = false;
+            }, function (error) {
+                Notification.show('Something went wrong while getting the list of authorized senders, please try again.', {
+                    type: "danger"
                 });
+                $scope.inProgress = false;
+            });
         };
 
-        $scope.setup = function () {
+        $scope.addSender = function (cloudName) {
 
-            $http.post('api/1.0/messenger/setup/')
-                .success(function (data) {
-                    checkSetup();
-
-                    Notification.show('Cloud successfully configured!', {
-                        type: "success"
-                    });
-                })
-                .error(function (data) {
-                    checkSetup();
-
-                    Notification.show('Error while configuring the cloud!', {
-                        type: "danger"
-                    });
+            AuthorizedSender.save(cloudName, function (data) {
+                refreshAuthorizedSenders();
+                Notification.show(cloudName + ' added as an authorized sender', {
+                    type: "success"
                 });
-
+            }, function (data) {
+                Notification.show('Error adding ' + cloudName + ' as an authorized sender!', {
+                    type: "danger"
+                });
+            });
         };
 
-        checkSetup();
+        $scope.deleteSender = function (cloudName) {
+
+            AuthorizedSender.delete({
+                cloudName: cloudName
+            }, function (data) {
+                refreshAuthorizedSenders();
+                Notification.show(cloudName + ' deleted from your authorized senders list', {
+                    type: "success"
+                });
+            }, function (data) {
+                Notification.show('Error deleting ' + cloudName + ' from your authorized senders list!', {
+                    type: "danger"
+                });
+
+            });
+        };
+
+        refreshAuthorizedSenders();
 
   }]);
 
@@ -99,6 +114,7 @@ controllers.controller("MessengerCtrl", ['$scope', 'Message', 'Notification',
             $scope.inProgress = true;
             Message.query(function (data) {
 
+                // shouldnt show the message the first refresh
                 if (_.size(data) > _.size($scope.messages) && _.isUndefined($scope.messages) === false) {
                     Notification.show('You\'ve got mail!');
                 }
@@ -144,6 +160,10 @@ controllers.controller("MessengerCtrl", ['$scope', 'Message', 'Notification',
 
         };
 
+        $scope.authorizedSenders = function () {
+            $scope.view = 'authorizedSenders';
+        };
+
         $scope.replyMessage = function (to) {
             composeMessage(to);
         };
@@ -163,8 +183,8 @@ controllers.controller("MessengerCtrl", ['$scope', 'Message', 'Notification',
 
                 var errorMsg = 'Error sending the message!';
 
-                if (data.data.indexOf('Link contract violation') >= 0) {
-                    errorMsg = 'It seems that the destination cloud in not yet configured.';
+                if (data.data.indexOf('Link contract violation') >= 0 || data.data.indexOf('No link contract') >= 0) {
+                    errorMsg = 'Destination cloud does not accept messages from you. Please contact its owner to add you as an authorized sender.';
                 }
 
                 Notification.show(errorMsg, {
@@ -187,6 +207,13 @@ services.factory('Message', ['$resource',
   function ($resource) {
         return $resource('api/1.0/messenger/messages/:id', {
             id: '@id'
+        });
+  }]);
+
+services.factory('AuthorizedSender', ['$resource',
+  function ($resource) {
+        return $resource('api/1.0/messenger/authorizedsenders/:cloudName', {
+            cloudName: '@cloudName'
         });
   }]);
 

@@ -1,6 +1,9 @@
 package xdi2.messenger.service;
 
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,17 +18,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import xdi2.client.exceptions.Xdi2ClientException;
+import xdi2.client.exceptions.Xdi2DiscoveryException;
 import xdi2.client.http.XDIHttpClient;
+import xdi2.client.util.XDIClientUtil;
 import xdi2.core.ContextNode;
 import xdi2.core.Graph;
 import xdi2.core.Literal;
 import xdi2.core.Relation;
 import xdi2.core.constants.XDITimestampsConstants;
-import xdi2.core.features.linkcontracts.instance.PublicLinkContract;
 import xdi2.core.features.nodetypes.XdiCommonRoot;
 import xdi2.core.features.nodetypes.XdiEntity;
 import xdi2.core.features.nodetypes.XdiEntityCollection;
 import xdi2.core.features.nodetypes.XdiEntityMember;
+import xdi2.core.features.signatures.KeyPairSignature;
 import xdi2.core.impl.memory.MemoryGraphFactory;
 import xdi2.core.syntax.CloudName;
 import xdi2.core.syntax.CloudNumber;
@@ -47,13 +52,16 @@ import xdi2.messenger.util.LogUtil;
 public class MessengerService {
 	private static final Logger log = LoggerFactory.getLogger(MessengerService.class);
 
-	private final static XDIAddress XDI_MESSAGES_COL = XDIAddress.create("[$messages]");
-	private final static XDIAddress XDI_MESSAGE_TIMESTAMP = XDIAddress.create("<$t>");
-	private final static XDIAddress XDI_MESSAGE_CONTENT = XDIAddress.create("<#content>");
-	private final static XDIAddress XDI_MESSAGE_FROM = XDIAddress.create("$from");
+	public final static XDIAddress XDI_MESSAGES_COL = XDIAddress.create("[$messages]");
+	public final static XDIAddress XDI_MESSAGE_TIMESTAMP = XDIAddress.create("<$t>");
+	public final static XDIAddress XDI_MESSAGE_CONTENT = XDIAddress.create("<#content>");
+	public final static XDIAddress XDI_MESSAGE_FROM = XDIAddress.create("$from");
 
 	@Autowired
 	ReverseNameResolutionService reverseNameResolutionService;
+	
+	@Autowired
+	MessengerAuthService messengerAuthService;
 
 	public Collection<Message> getAllMessages() throws Xdi2ClientException {
 		CloudUser user = (CloudUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -123,7 +131,7 @@ public class MessengerService {
 		return messages;
 	}
 
-	public void sendMessage(Message message) throws Xdi2ClientException {
+	public void sendMessage(Message message) throws Xdi2DiscoveryException, Xdi2ClientException, MalformedURLException, GeneralSecurityException {
 		Assert.notNull(message);
 
 		CloudUser user = (CloudUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -152,12 +160,18 @@ public class MessengerService {
 				user.getCloudNumber().getXDIAddress()));
 
 
-		// Send message
+		// Create XDI message
 		MessageEnvelope messageEnvelope = new MessageEnvelope();
 		xdi2.messaging.Message m = messageEnvelope.createMessage(user.getCloudNumber().getXDIAddress());
 		m.setToPeerRootXDIArc(toCloudNumber.getPeerRootXDIArc());
-		m.setLinkContract(PublicLinkContract.class);
+		m.setLinkContractXDIAddress(messengerAuthService.getMessengerLCXdiAddress(toCloudNumber.toString()));
 		m.createSetOperation(tempGraph);
+		
+		// Sign XDI message
+		PrivateKey cspSignaturePrivateKey = XDIClientUtil.retrieveSignaturePrivateKey(user.getCloudNumber(), new URL(user.getXdiEndpointUrl()), user.getSecretToken());
+		
+		KeyPairSignature signature = (KeyPairSignature) m.createSignature(KeyPairSignature.DIGEST_ALGORITHM_SHA, 256, KeyPairSignature.KEY_ALGORITHM_RSA, 2048, true);
+		signature.sign(cspSignaturePrivateKey);
 
 		log.debug("sendMessage message:\n" + messageEnvelope.getGraph().toString("XDI DISPLAY", null));
 
@@ -181,44 +195,5 @@ public class MessengerService {
 		user.getXdiClient().send(messageEnvelope, null);
 
 	}
-
-	public boolean checkCloudConfiguration() throws Xdi2ClientException {
-		CloudUser user = (CloudUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-		XDIStatement publicMessengerLC = XDIStatement.create("(" + user.getCloudNumber() + "/$public)$do/$set/" + user.getCloudNumber() + XDI_MESSAGES_COL);
-
-		MessageEnvelope messageEnvelope = new MessageEnvelope();
-		MessageCollection messageCollection = messageEnvelope.getMessageCollection(user.getCloudNumber().getXDIAddress(), true);
-		xdi2.messaging.Message message = messageCollection.createMessage();
-		message = user.prepareMessageToCloud(message);
-
-		message.createGetOperation(publicMessengerLC);
-
-		log.debug("checkCloudConfiguration message:\n" + LogUtil.prepareToLog(messageEnvelope.getGraph().toString("XDI DISPLAY", null)));
-
-		MessageResult messageResult = user.getXdiClient().send(messageEnvelope, null);
-
-		return messageResult.getGraph().containsStatement(publicMessengerLC);
-
-	}
-
-	public void setupCloud() throws Xdi2ClientException {
-		CloudUser user = (CloudUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-		XDIStatement publicMessengerLC = XDIStatement.create("(" + user.getCloudNumber() + "/$public)$do/$set/" + user.getCloudNumber() + XDI_MESSAGES_COL);
-
-		MessageEnvelope messageEnvelope = new MessageEnvelope();
-		MessageCollection messageCollection = messageEnvelope.getMessageCollection(user.getCloudNumber().getXDIAddress(), true);
-		xdi2.messaging.Message message = messageCollection.createMessage();
-		message = user.prepareMessageToCloud(message);
-
-		message.createSetOperation(publicMessengerLC);
-
-		log.debug("setupCloud message:\n" + LogUtil.prepareToLog(messageEnvelope.getGraph().toString("XDI DISPLAY", null)));
-
-		user.getXdiClient().send(messageEnvelope, null);
-
-	}
-
 
 }

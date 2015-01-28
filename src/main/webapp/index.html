@@ -71,41 +71,34 @@
     <!--main-->
     <div class="container-fluid" id="main" ng-controller="MessengerCtrl">
 
-        <div class="row" ng-controller="ConfigurationCtrl">
-            <div class="col-md-8 col-md-offset-2" ng-hide="configuration">
-                <div class="alert alert-danger" role="alert">
-                    <div class="row">
-                        <div class="col-xs-2 text-center">
-                            <i class="fa fa-warning fa-2x"></i>
-                        </div>
-                        <p class="col-xs-10">
-                            This messenger application needs to configure your cloud.
-                            <br />
-                            <a href ng-click="setup()">Please click here to configure it.</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
         <div class="row">
             <div class="col-sm-4">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <span class="pull-right"><a href class="btn btn-default" ng-click="composeMessage()"><i class="fa fa-file-text-o"></i> Compose Message</a></span>
+                        <span class="pull-right">
+                            <a href class="btn btn-default" ng-click="authorizedSenders()"><i class="fa fa-gear"></i> Authorized Senders</a>
+                            <a href class="btn btn-default" ng-click="composeMessage()"><i class="fa fa-file-text-o"></i> Compose Message</a>
+                        </span>
                         <h4>Messages</h4>
                     </div>
                     <div class="panel-body">
                         <div class="list-group">
-                            <a href class="list-group-item" ng-repeat="m in messages | orderBy : 'timestamp' : true" ng-click="readMessage(m.xdiAddress)">
+                            <div class="list-group-item" ng-hide="messages || !inProgress">
+                                <div class="row">
+                                    <div class="col-xs-2 text-center">
+                                        <i class="fa fa-refresh fa-2x fa-spin"></i>
+                                    </div>
+                                    <p class="col-xs-10">
+                                        Loading...
+                                    </p>
+                                </div>
+                            </div>
 
-                                <!--span class="badge">x</span-->
+                            <a href class="list-group-item" ng-repeat="m in messages | orderBy : 'timestamp' : true" ng-click="readMessage(m.xdiAddress)">
                                 <h4 class="list-group-item-heading">{{m.from}}</h4>
                                 <p class="text-right"><small>{{m.timestamp | date:'yyyy-MM-dd HH:mm:ss'}}</small>
                                 </p>
                             </a>
-
                         </div>
                     </div>
                 </div>
@@ -149,6 +142,44 @@
                         <button class="btn btn-success pull-right" type="button" ng-click="sendMessage()" ng-disabled="newMessageForm.$invalid">Send</button>
                         <div class="clearfix"></div>
                     </form>
+                </div>
+            </div>
+
+
+            <div class="col-sm-8" ng-show="view == 'authorizedSenders'">
+                <div class="well well-sm" ng-controller="ConfigurationCtrl">
+                    <form name="authorizedSenderForm" class="form-horizontal" ng-submit="addSender(cloudName)">
+                        <div class="form-group has-feedback" ng-class="{'has-error': authorizedSenderForm.cloudName.$error.cloudNameValidation}">
+                            <div class="col-xs-10">
+                                <input type="text" class="form-control" name="cloudName" id="cloudName" ng-model="cloudName" placeholder="Enter a cloud name" cloud-name-validation ng-model-options="{ debounce: 250 }">
+                                <span class="glyphicon glyphicon-remove form-control-feedback" ng-show="authorizedSenderForm.cloudName.$error.cloudNameValidation"></span>
+                            </div>
+                            <div class="col-xs-2">
+                                <button class="btn btn-success" type="submit" ng-disabled="authorizedSenderForm.$invalid">Add</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <ul class="list-group col-sm-7">
+                        <li class="list-group-item" ng-show="inProgress">
+                            <div class="row">
+                                <div class="col-xs-2 text-center">
+                                    <i class="fa fa-refresh fa-2x fa-spin"></i>
+                                </div>
+                                <p class="col-xs-10">
+                                    Loading...
+                                </p>
+                            </div>
+                        </li>
+
+                        <li class="list-group-item" ng-repeat="sender in authorizedSenders | orderBy:'toString()'">
+                            <button type="button" class="btn btn-danger btn-xs pull-right" ng-click="deleteSender(sender)"><i class="fa fa-minus"></i>
+                            </button>
+                            {{sender}}
+                        </li>
+                    </ul>
+
+                    <div class="clearfix"></div>
                 </div>
             </div>
         </div>
