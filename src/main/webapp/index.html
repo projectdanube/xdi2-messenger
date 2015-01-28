@@ -72,7 +72,7 @@
     <div class="container-fluid" id="main" ng-controller="MessengerCtrl">
 
         <div class="row">
-            <div class="col-sm-4">
+            <div class="col-sm-5">
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <span class="pull-right">
@@ -105,7 +105,7 @@
             </div>
 
 
-            <div class="col-sm-8" ng-show="view == 'readMessage'">
+            <div class="col-sm-7" ng-show="view == 'readMessage'">
                 <div class="well well-sm">
                     <div>
                         <span class="pull-right"><small>{{currentMessage.timestamp | date:'yyyy-MM-dd HH:mm:ss'}}</small></span>
@@ -123,7 +123,7 @@
                 </div>
             </div>
 
-            <div class="col-sm-8" ng-show="view == 'composeMessage'">
+            <div class="col-sm-7" ng-show="view == 'composeMessage'">
                 <div class="well well-sm">
                     <form name="newMessageForm" class="form-horizontal">
                         <div>
@@ -146,7 +146,7 @@
             </div>
 
 
-            <div class="col-sm-8" ng-show="view == 'authorizedSenders'">
+            <div class="col-sm-7" ng-show="view == 'authorizedSenders'">
                 <div class="well well-sm" ng-controller="ConfigurationCtrl">
                     <form name="authorizedSenderForm" class="form-horizontal" ng-submit="addSender(cloudName)">
                         <div class="form-group has-feedback" ng-class="{'has-error': authorizedSenderForm.cloudName.$error.cloudNameValidation}">
