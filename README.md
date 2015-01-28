@@ -1,12 +1,16 @@
 <a href="http://projectdanube.org/" target="_blank"><img src="http://projectdanube.github.com/xdi2/images/projectdanube_logo.png" align="right"></a>
 <img src="http://projectdanube.github.com/xdi2/images/logo64.png"><br>
 
-xdi2-messenger
-==============
+XDI Cloud Messenger
+===================
 
-xdi2-messenger is a demo messaging application using XDI.
+XDI Cloud Messenger is a demo messaging application using XDI.
 
-Website: https://xdi2.org/, sample deployment: https://cloud-messenger.xdi2.org/
+https://cloud-messenger.xdi2.org/
+
+### Information
+
+* [Walkthrough](https://github.com/projectdanube/xdi2-messenger/wiki/Walkthrough)
 
 ### How to build
 First, you need to build the main [XDI2](https://github.com/projectdanube/xdi2) project.
@@ -15,7 +19,7 @@ After that, just run
 
     mvn clean install
 
-That will generate xdi2-messenger.war. Deploy it in your favorite Java Servlet container.
+This will generate .war file ready for deployment.
 
 ### Community
 
