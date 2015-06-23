@@ -137,7 +137,7 @@ public class MessengerService {
 		CloudUser user = (CloudUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		// Discover destination cloud 
-		XDIDiscoveryClient xdiDiscoveryClient = user.getEnvironment() == Environment.PROD ? XDIDiscoveryClient.NEUSTAR_PROD_DISCOVERY_CLIENT : XDIDiscoveryClient.NEUSTAR_OTE_DISCOVERY_CLIENT;
+		XDIDiscoveryClient xdiDiscoveryClient = user.getEnvironment() == Environment.PROD ? XDIDiscoveryClient.XDI2_NEUSTAR_PROD_DISCOVERY_CLIENT : XDIDiscoveryClient.XDI2_NEUSTAR_OTE_DISCOVERY_CLIENT;
 
 		XDIDiscoveryResult discoveryResult = xdiDiscoveryClient.discoverFromRegistry(CloudName.create(message.getTo()).getXDIAddress(), null);
 		CloudNumber toCloudNumber = discoveryResult.getCloudNumber();
