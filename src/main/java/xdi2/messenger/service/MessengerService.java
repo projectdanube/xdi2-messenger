@@ -23,13 +23,13 @@ import xdi2.client.http.XDIHttpClient;
 import xdi2.client.util.XDIClientUtil;
 import xdi2.core.ContextNode;
 import xdi2.core.Graph;
-import xdi2.core.Literal;
+import xdi2.core.LiteralNode;
 import xdi2.core.Relation;
 import xdi2.core.constants.XDITimestampsConstants;
 import xdi2.core.features.nodetypes.XdiCommonRoot;
 import xdi2.core.features.nodetypes.XdiEntity;
 import xdi2.core.features.nodetypes.XdiEntityCollection;
-import xdi2.core.features.nodetypes.XdiEntityMember;
+import xdi2.core.features.nodetypes.XdiEntityInstance;
 import xdi2.core.features.signatures.KeyPairSignature;
 import xdi2.core.impl.memory.MemoryGraphFactory;
 import xdi2.core.syntax.CloudName;
@@ -89,10 +89,10 @@ public class MessengerService {
 			return messages;
 		}
 
-		ReadOnlyIterator<XdiEntityMember> iMessage = xdiMessagesCollection.getXdiMembers();
+		ReadOnlyIterator<XdiEntityInstance> iMessage = xdiMessagesCollection.getXdiInstances();
 
 		while (iMessage.hasNext()) {
-			XdiEntityMember messageXdi = iMessage.next();
+			XdiEntityInstance messageXdi = iMessage.next();
 
 			Message msg = new Message();
 
@@ -105,18 +105,18 @@ public class MessengerService {
 			while (relations.hasNext()) {
 				Relation r = relations.next();
 				
-				String cloudNumber = r.getTargetContextNodeXDIAddress().toString();
+				String cloudNumber = r.getTargetXDIAddress().toString();
 				String cloudName = reverseNameResolutionService.getCloudName(user.getEnvironment(), cloudNumber);
 
 				msg.setFrom(cloudName == null ? cloudNumber : cloudName);
 			}
 
-			Literal l = messageXdi.getGraph().getRootContextNode().getDeepLiteral(XDIAddressUtil.concatXDIAddresses(messageXdiAddress, XDI_MESSAGE_CONTENT, XDIAddress.create("&")));
+			LiteralNode l = messageXdi.getGraph().getRootContextNode().getDeepLiteralNode(XDIAddressUtil.concatXDIAddresses(messageXdiAddress, XDI_MESSAGE_CONTENT));
 			if (l != null) {
 				msg.setContent(l.getLiteralDataString());
 			}
 
-			l = messageXdi.getGraph().getRootContextNode().getDeepLiteral(XDIAddressUtil.concatXDIAddresses(messageXdiAddress, XDI_MESSAGE_TIMESTAMP, XDIAddress.create("&")));
+			l = messageXdi.getGraph().getRootContextNode().getDeepLiteralNode(XDIAddressUtil.concatXDIAddresses(messageXdiAddress, XDI_MESSAGE_TIMESTAMP));
 			if (l != null) {
 				try {
 					msg.setTimestamp(XDITimestampsConstants.FORMATS_TIMESTAMP[0].parse(l.getLiteralDataString()));
@@ -148,11 +148,11 @@ public class MessengerService {
 		XdiEntity msg = XdiCommonRoot.findCommonRoot(tempGraph)
 				.getXdiEntity(toCloudNumber.getXDIAddress(), true)
 				.getXdiEntityCollection(XDI_MESSAGES_COL, true)
-				.setXdiMemberUnordered(null);
+				.setXdiInstanceUnordered();
 
 		String timestamp = XDITimestampsConstants.FORMATS_TIMESTAMP[0].format(new Date());
-		msg.getXdiAttribute(XDI_MESSAGE_TIMESTAMP, true).getXdiValue(true).setLiteralString(timestamp);
-		msg.getXdiAttribute(XDI_MESSAGE_CONTENT, true).getXdiValue(true).setLiteralString(message.getContent());
+		msg.getXdiAttribute(XDI_MESSAGE_TIMESTAMP, true).setLiteralDataString(timestamp);
+		msg.getXdiAttribute(XDI_MESSAGE_CONTENT, true).setLiteralDataString(message.getContent());
 
 		tempGraph.setStatement(XDIStatement.fromRelationComponents(
 				msg.getXDIAddress(),
