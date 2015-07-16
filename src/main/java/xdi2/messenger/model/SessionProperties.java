@@ -7,7 +7,7 @@ public class SessionProperties implements Serializable {
 	
 	private String cloudName;
 	private String cloudNumber;
-	private String xdiEndpointUrl;
+	private String xdiEndpointUri;
 	private Environment environment;
 
 	public SessionProperties() {
@@ -17,7 +17,7 @@ public class SessionProperties implements Serializable {
 	public SessionProperties(CloudUser cloudUser) {
 		this.cloudName = cloudUser.getCloudName();
 		this.cloudNumber = cloudUser.getCloudNumber().toString();
-		this.xdiEndpointUrl = cloudUser.getXdiEndpointUrl();
+		this.xdiEndpointUri = cloudUser.getXdiEndpointUri();
 		this.environment = cloudUser.getEnvironment();
 	}
 	
@@ -34,11 +34,11 @@ public class SessionProperties implements Serializable {
 	public void setCloudNumber(String cloudNumber) {
 		this.cloudNumber = cloudNumber;
 	}
-	public String getXdiEndpointUrl() {
-		return xdiEndpointUrl;
+	public String getXdiEndpointUri() {
+		return xdiEndpointUri;
 	}
-	public void setXdiEndpointUrl(String xdiEndpointUrl) {
-		this.xdiEndpointUrl = xdiEndpointUrl;
+	public void setXdiEndpointUri(String xdiEndpointUri) {
+		this.xdiEndpointUri = xdiEndpointUri;
 	}
 	public Environment getEnvironment() {
 		return environment;

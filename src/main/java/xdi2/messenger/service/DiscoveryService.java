@@ -17,7 +17,7 @@ public class DiscoveryService {
 		Assert.notNull(env);
 		Assert.hasLength(cloudName);
 		
-		XDIDiscoveryResult result = getXdiDiscoveryForEnv(env).discoverFromRegistry(XDIAddress.create(cloudName), null);
+		XDIDiscoveryResult result = getXdiDiscoveryForEnv(env).discoverFromRegistry(XDIAddress.create(cloudName));
 
 		return result.getCloudNumber();
 	}

@@ -27,7 +27,7 @@ import xdi2.core.util.iterators.IterableIterator;
 import xdi2.messaging.Message;
 import xdi2.messaging.MessageCollection;
 import xdi2.messaging.MessageEnvelope;
-import xdi2.messaging.MessageResult;
+import xdi2.messaging.response.MessagingResponse;
 import xdi2.messenger.model.CloudUser;
 import xdi2.messenger.util.LogUtil;
 
@@ -105,7 +105,7 @@ public class MessengerAuthService {
 		message = user.prepareMessageToCloud(message);
 		message.createSetOperation(g);
 
-		user.getXdiClient().send(messageEnvelope, null);
+		user.getXdiClient().send(messageEnvelope);
 
 	}
 
@@ -129,7 +129,7 @@ public class MessengerAuthService {
 		message = user.prepareMessageToCloud(message);
 		message.createDelOperation(getOwnMessengerLCXdiAddress(cloudNumber));
 
-		user.getXdiClient().send(messageEnvelope, null);		
+		user.getXdiClient().send(messageEnvelope);		
 	}
 
 	// Messenger LC XDI Address used to add new authorized senders
@@ -155,9 +155,9 @@ public class MessengerAuthService {
 		message = user.prepareMessageToCloud(message);
 		message.createGetOperation(user.getCloudNumber().getXDIAddress());
 
-		MessageResult messageResult = user.getXdiClient().send(messageEnvelope, null);
+		MessagingResponse messagingResponse = user.getXdiClient().send(messageEnvelope);
 
-		return LinkContracts.getAllLinkContracts(messageResult.getGraph());
+		return LinkContracts.getAllLinkContracts(messagingResponse.getResultGraph());
 	}
 
 
@@ -176,7 +176,7 @@ public class MessengerAuthService {
 
 		log.debug("deletePublicLC message:\n" + LogUtil.prepareToLog(messageEnvelope.getGraph().toString("XDI DISPLAY", null)));
 
-		user.getXdiClient().send(messageEnvelope, null);
+		user.getXdiClient().send(messageEnvelope);
 
 	}
 

@@ -1,6 +1,5 @@
 package xdi2.messenger.controller;
 
-import java.net.MalformedURLException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.List;
@@ -34,7 +33,7 @@ public class MessengerController extends AbstractController {
 	}
 	
 	@RequestMapping(value = "/messages/", method = RequestMethod.POST)
-	public void sendMessage(@RequestBody Message message) throws Xdi2DiscoveryException, Xdi2ClientException, MalformedURLException, GeneralSecurityException  {
+	public void sendMessage(@RequestBody Message message) throws Xdi2DiscoveryException, Xdi2ClientException, GeneralSecurityException  {
 		messengerService.sendMessage(message);
 	}	
 	

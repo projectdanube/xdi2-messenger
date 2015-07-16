@@ -1,7 +1,6 @@
 package xdi2.messenger.service;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.text.ParseException;
@@ -19,7 +18,7 @@ import org.springframework.util.Assert;
 
 import xdi2.client.exceptions.Xdi2ClientException;
 import xdi2.client.exceptions.Xdi2DiscoveryException;
-import xdi2.client.http.XDIHttpClient;
+import xdi2.client.impl.http.XDIHttpClient;
 import xdi2.client.util.XDIClientUtil;
 import xdi2.core.ContextNode;
 import xdi2.core.Graph;
@@ -42,7 +41,7 @@ import xdi2.discovery.XDIDiscoveryClient;
 import xdi2.discovery.XDIDiscoveryResult;
 import xdi2.messaging.MessageCollection;
 import xdi2.messaging.MessageEnvelope;
-import xdi2.messaging.MessageResult;
+import xdi2.messaging.response.MessagingResponse;
 import xdi2.messenger.model.CloudUser;
 import xdi2.messenger.model.Environment;
 import xdi2.messenger.model.Message;
@@ -75,12 +74,12 @@ public class MessengerService {
 
 		log.debug("getAllMessages message:\n" + LogUtil.prepareToLog(messageEnvelope.getGraph().toString("XDI DISPLAY", null)));
 
-		MessageResult messageResult = user.getXdiClient().send(messageEnvelope, null);
+		MessagingResponse messagingResponse = user.getXdiClient().send(messageEnvelope);
 
 		// Parse messages collection
 		List<Message> messages = new ArrayList<Message>();
 
-		ContextNode contextNode = messageResult.getGraph().getDeepContextNode(XDIAddressUtil.concatXDIAddresses(user.getCloudNumber().getXDIAddress(), XDI_MESSAGES_COL));
+		ContextNode contextNode = messagingResponse.getResultGraph().getDeepContextNode(XDIAddressUtil.concatXDIAddresses(user.getCloudNumber().getXDIAddress(), XDI_MESSAGES_COL));
 		if (contextNode == null) {
 			return messages;
 		}
@@ -131,7 +130,7 @@ public class MessengerService {
 		return messages;
 	}
 
-	public void sendMessage(Message message) throws Xdi2DiscoveryException, Xdi2ClientException, MalformedURLException, GeneralSecurityException {
+	public void sendMessage(Message message) throws Xdi2DiscoveryException, Xdi2ClientException, GeneralSecurityException {
 		Assert.notNull(message);
 
 		CloudUser user = (CloudUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -139,9 +138,9 @@ public class MessengerService {
 		// Discover destination cloud 
 		XDIDiscoveryClient xdiDiscoveryClient = user.getEnvironment() == Environment.PROD ? XDIDiscoveryClient.XDI2_NEUSTAR_PROD_DISCOVERY_CLIENT : XDIDiscoveryClient.XDI2_NEUSTAR_OTE_DISCOVERY_CLIENT;
 
-		XDIDiscoveryResult discoveryResult = xdiDiscoveryClient.discoverFromRegistry(CloudName.create(message.getTo()).getXDIAddress(), null);
+		XDIDiscoveryResult discoveryResult = xdiDiscoveryClient.discoverFromRegistry(CloudName.create(message.getTo()).getXDIAddress());
 		CloudNumber toCloudNumber = discoveryResult.getCloudNumber();
-		URL toXdiEndpoint = discoveryResult.getXdiEndpointUrl();
+		URI toXdiEndpoint = discoveryResult.getXdiEndpointUri();
 
 		// Build the message graph
 		Graph tempGraph = MemoryGraphFactory.getInstance().openGraph();
@@ -168,14 +167,14 @@ public class MessengerService {
 		m.createSetOperation(tempGraph);
 		
 		// Sign XDI message
-		PrivateKey cspSignaturePrivateKey = XDIClientUtil.retrieveSignaturePrivateKey(user.getCloudNumber(), new URL(user.getXdiEndpointUrl()), user.getSecretToken());
+		PrivateKey cspSignaturePrivateKey = XDIClientUtil.retrieveSignaturePrivateKey(user.getCloudNumber(), URI.create(user.getXdiEndpointUri()), user.getSecretToken());
 		
 		KeyPairSignature signature = (KeyPairSignature) m.createSignature(KeyPairSignature.DIGEST_ALGORITHM_SHA, 256, KeyPairSignature.KEY_ALGORITHM_RSA, 2048, true);
 		signature.sign(cspSignaturePrivateKey);
 
 		log.debug("sendMessage message:\n" + messageEnvelope.getGraph().toString("XDI DISPLAY", null));
 
-		new XDIHttpClient(toXdiEndpoint).send(messageEnvelope, null);
+		new XDIHttpClient(toXdiEndpoint).send(messageEnvelope);
 
 	}
 
@@ -192,7 +191,7 @@ public class MessengerService {
 
 		log.debug("deleteMessage message:\n" + LogUtil.prepareToLog(messageEnvelope.getGraph().toString("XDI DISPLAY", null)));
 
-		user.getXdiClient().send(messageEnvelope, null);
+		user.getXdiClient().send(messageEnvelope);
 
 	}
 
