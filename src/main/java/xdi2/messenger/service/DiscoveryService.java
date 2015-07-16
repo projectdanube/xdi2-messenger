@@ -8,26 +8,16 @@ import xdi2.core.syntax.CloudNumber;
 import xdi2.core.syntax.XDIAddress;
 import xdi2.discovery.XDIDiscoveryClient;
 import xdi2.discovery.XDIDiscoveryResult;
-import xdi2.messenger.model.Environment;
 
 @Service
 public class DiscoveryService {
 	
-	public CloudNumber discover (Environment env, String cloudName) throws Xdi2ClientException {
-		Assert.notNull(env);
+	public CloudNumber discover (String cloudName) throws Xdi2ClientException {
 		Assert.hasLength(cloudName);
 		
-		XDIDiscoveryResult result = getXdiDiscoveryForEnv(env).discoverFromRegistry(XDIAddress.create(cloudName));
+		XDIDiscoveryResult result = XDIDiscoveryClient.XDI2_DISCOVERY_CLIENT.discoverFromRegistry(XDIAddress.create(cloudName));
 
 		return result.getCloudNumber();
-	}
-	
-	private XDIDiscoveryClient getXdiDiscoveryForEnv(Environment env) {
-		
-		if (env == Environment.OTE) 
-			return XDIDiscoveryClient.XDI2_NEUSTAR_OTE_DISCOVERY_CLIENT;
-		else
-			return XDIDiscoveryClient.XDI2_NEUSTAR_PROD_DISCOVERY_CLIENT;
 	}
 	
 }

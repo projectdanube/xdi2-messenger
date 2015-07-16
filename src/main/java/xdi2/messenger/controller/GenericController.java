@@ -31,7 +31,7 @@ public class GenericController extends AbstractController {
 	public String discoverCloudName(@PathVariable String cloudName) throws Xdi2ClientException {
 		CloudUser user = (CloudUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		return ObjectUtils.toString("\"" + discoveryService.discover(user.getEnvironment(), cloudName) + "\"", null);
+		return ObjectUtils.toString("\"" + discoveryService.discover(cloudName) + "\"", null);
 	}
 	
 }

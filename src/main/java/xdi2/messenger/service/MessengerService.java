@@ -43,7 +43,6 @@ import xdi2.messaging.MessageCollection;
 import xdi2.messaging.MessageEnvelope;
 import xdi2.messaging.response.MessagingResponse;
 import xdi2.messenger.model.CloudUser;
-import xdi2.messenger.model.Environment;
 import xdi2.messenger.model.Message;
 import xdi2.messenger.util.LogUtil;
 
@@ -105,7 +104,7 @@ public class MessengerService {
 				Relation r = relations.next();
 				
 				String cloudNumber = r.getTargetXDIAddress().toString();
-				String cloudName = reverseNameResolutionService.getCloudName(user.getEnvironment(), cloudNumber);
+				String cloudName = reverseNameResolutionService.getCloudName(cloudNumber);
 
 				msg.setFrom(cloudName == null ? cloudNumber : cloudName);
 			}
@@ -136,7 +135,7 @@ public class MessengerService {
 		CloudUser user = (CloudUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		// Discover destination cloud 
-		XDIDiscoveryClient xdiDiscoveryClient = user.getEnvironment() == Environment.PROD ? XDIDiscoveryClient.XDI2_NEUSTAR_PROD_DISCOVERY_CLIENT : XDIDiscoveryClient.XDI2_NEUSTAR_OTE_DISCOVERY_CLIENT;
+		XDIDiscoveryClient xdiDiscoveryClient = XDIDiscoveryClient.XDI2_DISCOVERY_CLIENT;
 
 		XDIDiscoveryResult discoveryResult = xdiDiscoveryClient.discoverFromRegistry(CloudName.create(message.getTo()).getXDIAddress());
 		CloudNumber toCloudNumber = discoveryResult.getCloudNumber();

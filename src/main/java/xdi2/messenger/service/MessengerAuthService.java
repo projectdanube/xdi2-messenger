@@ -66,7 +66,7 @@ public class MessengerAuthService {
 			if (foundTarget == false) continue;
 
 			String cloudNumber = ((GenericLinkContract) linkContract).getRequestingAuthority().toString();
-			String cloudName = reverseNameResolutionService.getCloudName(user.getEnvironment(), cloudNumber);
+			String cloudName = reverseNameResolutionService.getCloudName(cloudNumber);
 
 			cloudNames.add(cloudName != null ? cloudName : cloudNumber);			
 		}
@@ -79,7 +79,7 @@ public class MessengerAuthService {
 		
 		CloudUser user = (CloudUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		CloudNumber cloudNumber = discoveryService.discover(user.getEnvironment(), cloudName);
+		CloudNumber cloudNumber = discoveryService.discover(cloudName);
 		addAuthorizedCloudNumber(cloudNumber.toString());
 	}
 
@@ -114,7 +114,7 @@ public class MessengerAuthService {
 		
 		CloudUser user = (CloudUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		CloudNumber cloudNumber = discoveryService.discover(user.getEnvironment(), cloudName);
+		CloudNumber cloudNumber = discoveryService.discover(cloudName);
 		deleteAuthorizedCloudNumber(cloudNumber.toString());
 	}
 
