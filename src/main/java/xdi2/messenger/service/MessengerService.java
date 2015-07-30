@@ -149,8 +149,8 @@ public class MessengerService {
 				.setXdiInstanceUnordered();
 
 		String timestamp = XDITimestampsConstants.FORMATS_TIMESTAMP[0].format(new Date());
-		msg.getXdiAttribute(XDI_MESSAGE_TIMESTAMP, true).setLiteralDataString(timestamp);
-		msg.getXdiAttribute(XDI_MESSAGE_CONTENT, true).setLiteralDataString(message.getContent());
+		msg.getXdiAttribute(XDI_MESSAGE_TIMESTAMP, true).setLiteralString(timestamp);
+		msg.getXdiAttribute(XDI_MESSAGE_CONTENT, true).setLiteralString(message.getContent());
 
 		tempGraph.setStatement(XDIStatement.fromRelationComponents(
 				msg.getXDIAddress(),
