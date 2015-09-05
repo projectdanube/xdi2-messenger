@@ -1,7 +1,7 @@
 <a href="http://projectdanube.org/" target="_blank"><img src="http://projectdanube.github.com/xdi2/images/projectdanube_logo.png" align="right"></a>
 <img src="http://projectdanube.github.com/xdi2/images/logo64.png"><br>
 
-XDI Cloud Messenger [https://cloud-manager.xdi2.org/](https://cloud-manager.xdi2.org/)
+XDI Cloud Messenger [https://cloud-messenger.xdi2.org/](https://cloud-messenger.xdi2.org/)
 
 This is a demo cloud-to-cloud messaging application using XDI.
 
