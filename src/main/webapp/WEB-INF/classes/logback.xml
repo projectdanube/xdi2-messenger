@@ -14,7 +14,7 @@
 	</appender>
 
 	<appender name="dailyRollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<File>${destination}xdi-messenger.log</File>
+		<File>${destination}xdi2-messenger.log</File>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- daily rollover -->
 			<FileNamePattern>${destination}xdi-messenger.%d{yyyy-MM-dd}.log</FileNamePattern>
