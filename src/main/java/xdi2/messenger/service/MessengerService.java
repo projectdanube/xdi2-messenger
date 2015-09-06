@@ -29,8 +29,9 @@ import xdi2.core.features.nodetypes.XdiCommonRoot;
 import xdi2.core.features.nodetypes.XdiEntity;
 import xdi2.core.features.nodetypes.XdiEntityCollection;
 import xdi2.core.features.nodetypes.XdiEntityInstance;
-import xdi2.core.features.signatures.KeyPairSignature;
+import xdi2.core.features.signatures.RSASignature;
 import xdi2.core.impl.memory.MemoryGraphFactory;
+import xdi2.core.security.sign.RSAStaticPrivateKeySignatureCreator;
 import xdi2.core.syntax.CloudName;
 import xdi2.core.syntax.CloudNumber;
 import xdi2.core.syntax.XDIAddress;
@@ -57,7 +58,7 @@ public class MessengerService {
 
 	@Autowired
 	ReverseNameResolutionService reverseNameResolutionService;
-	
+
 	@Autowired
 	MessengerAuthService messengerAuthService;
 
@@ -98,11 +99,11 @@ public class MessengerService {
 			msg.setXdiAddress(messageXdiAddress.toString());
 			msg.setXdi(messageXdi.getGraph().toString("XDI DISPLAY", null));
 
-			
+
 			ReadOnlyIterator<Relation> relations = messageXdi.getGraph().getDeepRelations(messageXdi.getXDIAddress(), XDI_MESSAGE_FROM);
 			while (relations.hasNext()) {
 				Relation r = relations.next();
-				
+
 				String cloudNumber = r.getTargetXDIAddress().toString();
 				String cloudName = reverseNameResolutionService.getCloudName(cloudNumber);
 
@@ -164,12 +165,12 @@ public class MessengerService {
 		m.setToPeerRootXDIArc(toCloudNumber.getPeerRootXDIArc());
 		m.setLinkContractXDIAddress(messengerAuthService.getMessengerLCXdiAddress(toCloudNumber.toString()));
 		m.createSetOperation(tempGraph);
-		
+
 		// Sign XDI message
 		PrivateKey cspSignaturePrivateKey = XDIClientUtil.retrieveSignaturePrivateKey(user.getCloudNumber(), URI.create(user.getXdiEndpointUri()), user.getSecretToken());
-		
-		KeyPairSignature signature = (KeyPairSignature) m.createSignature(KeyPairSignature.DIGEST_ALGORITHM_SHA, 256, KeyPairSignature.KEY_ALGORITHM_RSA, 2048, true);
-		signature.sign(cspSignaturePrivateKey);
+
+		RSASignature signature = (RSASignature) m.createSignature(RSASignature.DIGEST_ALGORITHM_SHA, 256, RSASignature.KEY_ALGORITHM_RSA, 2048, true);
+		new RSAStaticPrivateKeySignatureCreator(cspSignaturePrivateKey).createSignature(signature);
 
 		log.debug("sendMessage message:\n" + messageEnvelope.getGraph().toString("XDI DISPLAY", null));
 
