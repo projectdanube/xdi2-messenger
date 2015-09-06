@@ -45,7 +45,7 @@ public class MessengerAuthService {
 
 	public List<String> getAuthorizedClouds() throws Xdi2ClientException {
 		CloudUser user = (CloudUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		
+
 		// deletes the old public LC
 		deletePublicLC();
 
@@ -76,7 +76,7 @@ public class MessengerAuthService {
 
 	public void addAuthorizedCloudName(String cloudName) throws Xdi2ClientException {
 		Assert.hasLength(cloudName);
-		
+
 		CloudUser user = (CloudUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		CloudNumber cloudNumber = discoveryService.discover(cloudName);
@@ -90,7 +90,7 @@ public class MessengerAuthService {
 
 		// set up a link contract
 		Graph g = MemoryGraphFactory.getInstance().openGraph();
-		LinkContract l = GenericLinkContract.findGenericLinkContract(g, XDIAddress.create(user.getCloudNumber().toString()), XDIAddress.create(cloudNumber), XDI_LC_TAG, true);
+		LinkContract l = GenericLinkContract.findGenericLinkContract(g, XDIAddress.create(user.getCloudNumber().toString()), XDIAddress.create(cloudNumber), XDI_LC_TAG, true, true);
 
 		l.setPermissionTargetXDIAddress(XDILinkContractConstants.XDI_ADD_SET, XDIAddress.create("" + user.getCloudNumber() + MessengerService.XDI_MESSAGES_COL));
 
@@ -111,7 +111,7 @@ public class MessengerAuthService {
 
 	public void deleteAuthorizedCloudName(String cloudName) throws Xdi2ClientException {
 		Assert.hasLength(cloudName);
-		
+
 		CloudUser user = (CloudUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		CloudNumber cloudNumber = discoveryService.discover(cloudName);
@@ -120,7 +120,7 @@ public class MessengerAuthService {
 
 	public void deleteAuthorizedCloudNumber(String cloudNumber) throws Xdi2ClientException {
 		Assert.hasLength(cloudNumber);
-		
+
 		CloudUser user = (CloudUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		MessageEnvelope messageEnvelope = new MessageEnvelope();
