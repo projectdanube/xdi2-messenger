@@ -31,7 +31,7 @@ import xdi2.core.features.nodetypes.XdiEntityCollection;
 import xdi2.core.features.nodetypes.XdiEntityInstance;
 import xdi2.core.features.signatures.RSASignature;
 import xdi2.core.impl.memory.MemoryGraphFactory;
-import xdi2.core.security.sign.RSAStaticPrivateKeySignatureCreator;
+import xdi2.core.security.signature.create.RSAStaticPrivateKeySignatureCreator;
 import xdi2.core.syntax.CloudName;
 import xdi2.core.syntax.CloudNumber;
 import xdi2.core.syntax.XDIAddress;
