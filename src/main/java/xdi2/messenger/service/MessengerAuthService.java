@@ -90,7 +90,7 @@ public class MessengerAuthService {
 
 		// set up a link contract
 		Graph g = MemoryGraphFactory.getInstance().openGraph();
-		LinkContract l = GenericLinkContract.findGenericLinkContract(g, XDIAddress.create(user.getCloudNumber().toString()), XDIAddress.create(cloudNumber), XDI_LC_TAG, true, true);
+		LinkContract l = GenericLinkContract.findGenericLinkContract(g, XDIAddress.create(user.getCloudNumber().toString()), XDIAddress.create(cloudNumber), XDI_LC_TAG, null, true);
 
 		l.setPermissionTargetXDIAddress(XDILinkContractConstants.XDI_ADD_SET, XDIAddress.create("" + user.getCloudNumber() + MessengerService.XDI_MESSAGES_COL));
 
