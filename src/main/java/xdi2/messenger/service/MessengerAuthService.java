@@ -15,8 +15,8 @@ import xdi2.client.exceptions.Xdi2ClientException;
 import xdi2.core.Graph;
 import xdi2.core.constants.XDILinkContractConstants;
 import xdi2.core.features.linkcontracts.LinkContracts;
-import xdi2.core.features.linkcontracts.instance.GenericLinkContract;
 import xdi2.core.features.linkcontracts.instance.LinkContract;
+import xdi2.core.features.linkcontracts.instance.RelationshipLinkContract;
 import xdi2.core.features.policy.PolicyAnd;
 import xdi2.core.features.policy.PolicyUtil;
 import xdi2.core.impl.memory.MemoryGraphFactory;
@@ -65,7 +65,7 @@ public class MessengerAuthService {
 			}
 			if (foundTarget == false) continue;
 
-			String cloudNumber = ((GenericLinkContract) linkContract).getRequestingAuthority().toString();
+			String cloudNumber = ((RelationshipLinkContract) linkContract).getRequestingAuthority().toString();
 			String cloudName = reverseNameResolutionService.getCloudName(cloudNumber);
 
 			cloudNames.add(cloudName != null ? cloudName : cloudNumber);			
@@ -90,7 +90,7 @@ public class MessengerAuthService {
 
 		// set up a link contract
 		Graph g = MemoryGraphFactory.getInstance().openGraph();
-		LinkContract l = GenericLinkContract.findGenericLinkContract(g, XDIAddress.create(user.getCloudNumber().toString()), XDIAddress.create(cloudNumber), XDI_LC_TAG, null, true);
+		LinkContract l = RelationshipLinkContract.findRelationshipLinkContract(g, XDIAddress.create(user.getCloudNumber().toString()), XDIAddress.create(cloudNumber), XDI_LC_TAG, null, true);
 
 		l.setPermissionTargetXDIAddress(XDILinkContractConstants.XDI_ADD_SET, XDIAddress.create("" + user.getCloudNumber() + MessengerService.XDI_MESSAGES_COL));
 
